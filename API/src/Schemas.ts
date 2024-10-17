@@ -16,7 +16,6 @@ export interface IGood extends Document {
     warehouse: Types.ObjectId;
     name: string;
     description: string;
-    stock: number;
 }
 
 const supplierSchema = new Schema<ISupplier>({
@@ -34,7 +33,6 @@ const goodSchema = new Schema<IGood>({
     warehouse: Types.ObjectId,
     name: String,
     description: String,
-    stock: Number,
 });
 
 export const Supplier = model<ISupplier>('supplier', supplierSchema);
