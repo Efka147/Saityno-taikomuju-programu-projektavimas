@@ -5,6 +5,7 @@ import { isValidObjectId } from 'mongoose';
 import { isValidParam } from '../sharedFunctions';
 import { Role, ValidRoles } from '../constants';
 import { EndpointAccessType } from '../types';
+import warehouseRouter from './warehouseRouter';
 const supplierRouter = Router();
 const validKeys = {
     put: ['name', 'description', 'rating'],
@@ -53,24 +54,24 @@ supplierRouter.get('/supplier', authorizationMiddleware, async (req: Request, re
     res.status(CODES.GET.success).send(await Supplier.find({}, projection));
 });
 
-supplierRouter.get('/supplier/:id', authorizationMiddleware, async (req: Request, res: Response) => {
-    const { id } = req.params;
-    if (!isValidObjectId(id)) {
+supplierRouter.get('/supplier/:supplierId', authorizationMiddleware, async (req: Request, res: Response) => {
+    const { supplierId } = req.params;
+    if (!isValidObjectId(supplierId)) {
         res.status(CODES.PUT.failure.BadRequest).send({ message: 'Supplier id was not provided or is not a valid object id' });
         return;
     }
-    const supplier = await Supplier.findById(id, projection);
+    const supplier = await Supplier.findById(supplierId, projection);
     if (supplier) res.status(CODES.GET.success).json(supplier);
     else res.status(CODES.GET.failure.NotFound).json({ message: 'Supplier with provided id was not found' });
 });
 
-supplierRouter.put('/supplier/:id', authorizationMiddleware, async (req: Request, res: Response) => {
+supplierRouter.put('/supplier/:supplierId', authorizationMiddleware, async (req: Request, res: Response) => {
     if (!req.body) {
         res.status(CODES.PUT.failure.BadRequest).json({ message: 'Request body was not provided' });
         return;
     }
-    const { id } = req.params;
-    if (!isValidObjectId(id)) {
+    const { supplierId } = req.params;
+    if (!isValidObjectId(supplierId)) {
         res.status(CODES.PUT.failure.BadRequest).json({ message: 'Supplier id is not valid' });
         return;
     }
@@ -88,7 +89,7 @@ supplierRouter.put('/supplier/:id', authorizationMiddleware, async (req: Request
         return;
     }
 
-    const supplier = await Supplier.findById(id);
+    const supplier = await Supplier.findById(supplierId);
     if (!supplier) {
         res.status(CODES.PUT.failure.NotFound).json({ message: 'Supplier with provided id was not found' });
         return;
@@ -128,13 +129,13 @@ supplierRouter.post('/supplier', authorizationMiddleware, async (req: Request, r
     res.status(CODES.PUT.success).send();
 });
 
-supplierRouter.delete('/supplier/:id', authorizationMiddleware, async (req: Request, res: Response) => {
-    const { id } = req.params;
-    if (!isValidObjectId(id)) {
+supplierRouter.delete('/supplier/:supplierId', authorizationMiddleware, async (req: Request, res: Response) => {
+    const { supplierId } = req.params;
+    if (!isValidObjectId(supplierId)) {
         res.status(CODES.DELETE.failure.BadRequest).json({ message: 'Supplier id is not valid' });
         return;
     }
-    const result = await Supplier.findById(id);
+    const result = await Supplier.findById(supplierId);
     if (!result) {
         res.status(CODES.DELETE.failure.NotFound).json({ message: 'Supplier with provided id was not found' });
         return;
@@ -150,5 +151,7 @@ supplierRouter.delete('/supplier/:id', authorizationMiddleware, async (req: Requ
 
     res.status(CODES.DELETE.success.withoutBody).send();
 });
+
+supplierRouter.use('/supplier/:supplierId', warehouseRouter);
 
 export default supplierRouter;

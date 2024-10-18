@@ -2,7 +2,7 @@ import cors from 'cors';
 import express, { Request, Response, NextFunction } from 'express';
 import { config } from 'dotenv';
 import { connectDB } from './db';
-import { supplierRouter, warehouseRouter, goodRouter } from './routers';
+import { supplierRouter } from './routers';
 
 config();
 
@@ -21,8 +21,6 @@ app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
 });
 
 app.use('/api', supplierRouter);
-app.use('/api', warehouseRouter);
-app.use('/api', goodRouter);
 
 app.use((_req: Request, res: Response) => {
     res.status(404).send({ message: 'Endpoint not found' });

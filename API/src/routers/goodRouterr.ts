@@ -50,16 +50,25 @@ const authorizationMiddleware = (req: Request, res: Response, next: NextFunction
 };
 
 goodRouter.get('/good', authorizationMiddleware, async (req: Request, res: Response) => {
-    res.status(CODES.GET.success).send(await Good.find({}, projection));
+    const { warehouseId } = req.params;
+    if (!isValidObjectId(warehouseId)) {
+        res.status(CODES.GET.failure.BadRequest).send({ message: 'Warehouse id is not a valid object id' });
+        return;
+    }
+    res.status(CODES.GET.success).send(await Good.find({ warehouse: warehouseId }, projection));
 });
 
 goodRouter.get('/good/:id', authorizationMiddleware, async (req: Request, res: Response) => {
-    const { id } = req.params;
-    if (!isValidObjectId(id)) {
-        res.status(CODES.PUT.failure.BadRequest).send({ message: 'Good id was not provided or is not a valid object id' });
+    const { id, warehouseId } = req.params;
+    if (!isValidObjectId(warehouseId)) {
+        res.status(CODES.PUT.failure.BadRequest).send({ message: 'Warehouse id is not a valid object id' });
         return;
     }
-    const good = await Good.findById(id, projection);
+    if (!isValidObjectId(id)) {
+        res.status(CODES.PUT.failure.BadRequest).send({ message: 'Good id is not a valid object id' });
+        return;
+    }
+    const good = await Good.findOne({ id: id, warehouse: warehouseId }, projection);
     if (good) res.status(CODES.GET.success).json(good);
     else res.status(CODES.GET.failure.NotFound).json({ message: 'Good with provided id was not found' });
 });
@@ -69,7 +78,13 @@ goodRouter.put('/good/:id', authorizationMiddleware, async (req: Request, res: R
         res.status(CODES.PUT.failure.BadRequest).json({ message: 'Request body was not provided' });
         return;
     }
-    const { id } = req.params;
+    const { id, warehouseId } = req.params;
+
+    if (!isValidObjectId(warehouseId)) {
+        res.status(CODES.PUT.failure.BadRequest).send({ message: 'Warehouse id is not a valid object id' });
+        return;
+    }
+
     if (!isValidObjectId(id)) {
         res.status(CODES.PUT.failure.BadRequest).json({ message: 'Good id is not valid' });
         return;
@@ -88,7 +103,7 @@ goodRouter.put('/good/:id', authorizationMiddleware, async (req: Request, res: R
         return;
     }
 
-    const good = await Good.findById(id);
+    const good = await Good.findOne({ id: id, warehouse: warehouseId });
     if (!good) {
         res.status(CODES.PUT.failure.NotFound).json({ message: 'Good with provided id was not found' });
         return;
@@ -102,39 +117,44 @@ goodRouter.put('/good/:id', authorizationMiddleware, async (req: Request, res: R
 });
 
 goodRouter.post('/good', authorizationMiddleware, async (req: Request, res: Response) => {
+    const { warehouseId } = req.params;
+    if (!isValidObjectId(warehouseId)) {
+        res.status(CODES.PUT.failure.BadRequest).send({ message: 'Warehouse id is not a valid object id' });
+        return;
+    }
     if (!req.body) {
         res.status(CODES.PUT.failure.BadRequest).json({ message: 'Malformed body' });
         return;
     }
-    const { warehouse, name, description, ...rest } = req.body;
+    const { name, description, ...rest } = req.body;
 
     if (
-        (Object.keys(rest).length !== 0,
-        Object.keys(req.body).length !== 3 ||
-            !isValidParam(warehouse, 'objID') ||
-            !isValidParam(name, 'string') ||
-            !isValidParam(description, 'string'))
+        (Object.keys(rest).length !== 0, Object.keys(req.body).length !== 3 || !isValidParam(name, 'string') || !isValidParam(description, 'string'))
     ) {
         res.status(CODES.POST.failure.BadRequest).json({ message: 'Malformed body' });
         return;
     }
-    const existingWarehouse = await Warehouse.findById(warehouse);
+    const existingWarehouse = await Warehouse.findById(warehouseId);
     if (!existingWarehouse) {
         res.status(CODES.POST.failure.UnprocessableRequest).json({ message: 'Warehouse with this id was not found' });
         return;
     }
 
-    await Good.create({ warehouse: warehouse, name: name, description: description });
+    await Good.create({ warehouse: warehouseId, name: name, description: description });
     res.status(CODES.PUT.success).send();
 });
 
 goodRouter.delete('/good/:id', authorizationMiddleware, async (req: Request, res: Response) => {
-    const { id } = req.params;
+    const { id, warehouseId } = req.params;
+    if (!isValidObjectId(warehouseId)) {
+        res.status(CODES.PUT.failure.BadRequest).send({ message: 'Warehouse id is not a valid object id' });
+        return;
+    }
     if (!isValidObjectId(id)) {
         res.status(CODES.DELETE.failure.BadRequest).json({ message: 'Good id is not valid' });
         return;
     }
-    const result = await Good.findById(id);
+    const result = await Good.findOne({ id: id, warehouse: warehouseId });
     if (!result) {
         res.status(CODES.DELETE.failure.NotFound).json({ message: 'Good with provided id was not found' });
         return;
