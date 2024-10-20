@@ -101,7 +101,6 @@ warehouseRouter.get('/warehouse/:warehouseId', authorizationMiddleware, relation
         );
         return;
     }
-    console.log(supplierId, warehouseId);
     const supplier = await Warehouse.findOne({ supplier: supplierId, _id: warehouseId }, projection);
     if (supplier) res.status(CODES.GET.success).json(supplier);
     else res.status(CODES.GET.failure.NotFound).json(makeErrorMessage(CODES.GET.failure.NotFound, 'Warehouse with provided id was not found'));
