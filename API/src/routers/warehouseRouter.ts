@@ -2,7 +2,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { StatusCodes as CODES } from './statusCodes';
 import { Supplier, Warehouse, Good, ISupplier } from '../Schemas';
 import { isValidObjectId } from 'mongoose';
-import { isValidParam } from '../sharedFunctions';
+import { isValidParam, makeErrorMessage } from '../sharedFunctions';
 import { Role, ValidRoles } from '../constants';
 import { EndpointAccessType } from '../types';
 import goodRouter from './goodRouterr';
@@ -12,28 +12,28 @@ const validKeys = {
 };
 
 const projection = { id: 1, supplier: 1, location: 1, sizeSquareMeters: 1 };
-const rolesWithEndpoints: EndpointAccessType = {
-    GET: {
-        [Role.ADMIN]: true,
-        [Role.SUPPLIER]: true,
-        [Role.WAREHOUSE]: false,
-    },
-    POST: {
-        [Role.ADMIN]: true,
-        [Role.SUPPLIER]: true,
-        [Role.WAREHOUSE]: false,
-    },
-    PUT: {
-        [Role.ADMIN]: true,
-        [Role.SUPPLIER]: true,
-        [Role.WAREHOUSE]: false,
-    },
-    DELETE: {
-        [Role.ADMIN]: true,
-        [Role.SUPPLIER]: true,
-        [Role.WAREHOUSE]: false,
-    },
-};
+// const rolesWithEndpoints: EndpointAccessType = {
+//     GET: {
+//         [Role.ADMIN]: true,
+//         [Role.SUPPLIER]: true,
+//         [Role.WAREHOUSE]: false,
+//     },
+//     POST: {
+//         [Role.ADMIN]: true,
+//         [Role.SUPPLIER]: true,
+//         [Role.WAREHOUSE]: false,
+//     },
+//     PUT: {
+//         [Role.ADMIN]: true,
+//         [Role.SUPPLIER]: true,
+//         [Role.WAREHOUSE]: false,
+//     },
+//     DELETE: {
+//         [Role.ADMIN]: true,
+//         [Role.SUPPLIER]: true,
+//         [Role.WAREHOUSE]: false,
+//     },
+// };
 const authorizationMiddleware = (req: Request, res: Response, next: NextFunction) => {
     // const { role } = req.query;
     // if (!role || !ValidRoles.includes(Number(role))) {
@@ -50,30 +50,71 @@ const authorizationMiddleware = (req: Request, res: Response, next: NextFunction
     next();
 };
 
-warehouseRouter.get('/warehouse', authorizationMiddleware, async (req: Request, res: Response) => {
-    const { supplierId } = req.params;
-    res.status(CODES.GET.success).send(await Warehouse.find({ supplier: supplierId }, projection));
-});
-
-warehouseRouter.get('/warehouse/:warehouseId', authorizationMiddleware, async (req: Request, res: Response) => {
-    const { warehouseId } = req.params;
-    if (!isValidObjectId(warehouseId)) {
-        res.status(CODES.PUT.failure.BadRequest).send({ message: 'Warehouse id was not provided or is not a valid object id' });
+const relationMiddleware = async (req: Request, res: Response, next: NextFunction) => {
+    const { supplierId, warehouseId } = req.params;
+    if (!supplierId) {
+        res.status(400).json(makeErrorMessage(400, 'Supplier id was not provided'));
         return;
     }
-    const supplier = await Warehouse.findById(warehouseId, projection);
-    if (supplier) res.status(CODES.GET.success).json(supplier);
-    else res.status(CODES.GET.failure.NotFound).json({ message: 'Warehouse with provided id was not found' });
+    if (!isValidObjectId(supplierId)) {
+        res.status(400).json(makeErrorMessage(400, 'Supplier id is not a valid object id'));
+        return;
+    }
+    if (req.method === 'POST' && (req.originalUrl.endsWith('warehouse') || req.originalUrl.endsWith('warehouse/'))) {
+        next();
+        return;
+    }
+    if (!warehouseId) {
+        res.status(400).json(makeErrorMessage(400, 'Warehouse id was not provided'));
+        return;
+    }
+    if (!isValidObjectId(warehouseId)) {
+        res.status(400).json(makeErrorMessage(400, 'Warehouse id is not a valid object id'));
+        return;
+    }
+
+    if (await Warehouse.find({ id: warehouseId, supplier: supplierId })) next();
+    else res.status(404).json(makeErrorMessage(404, `Warehouse with provided id doesn't belong to provided supplier`));
+};
+
+warehouseRouter.get('/warehouse', authorizationMiddleware, async (req: Request, res: Response) => {
+    const { supplierId } = req.params;
+    if (!isValidObjectId(supplierId)) {
+        res.status(CODES.GET.failure.BadRequest).json(
+            makeErrorMessage(CODES.GET.failure.BadRequest, 'Supplier id was not provided or is not a valid object id')
+        );
+        return;
+    }
+    const supplier = await Supplier.findById(supplierId);
+    if (!supplier) {
+        res.status(CODES.GET.failure.BadRequest).json(makeErrorMessage(CODES.GET.failure.BadRequest, 'Provided supplier does not exist '));
+        return;
+    }
+    res.status(CODES.GET.success).send(await Warehouse.find({ supplier: supplier.id }, projection));
 });
 
-warehouseRouter.put('/warehouse/:warehouseId', authorizationMiddleware, async (req: Request, res: Response) => {
+warehouseRouter.get('/warehouse/:warehouseId', authorizationMiddleware, relationMiddleware, async (req: Request, res: Response) => {
+    const { warehouseId, supplierId } = req.params;
+    if (!isValidObjectId(warehouseId)) {
+        res.status(CODES.GET.failure.BadRequest).json(
+            makeErrorMessage(CODES.GET.failure.BadRequest, 'Warehouse id was not provided or is not a valid object id')
+        );
+        return;
+    }
+    console.log(supplierId, warehouseId);
+    const supplier = await Warehouse.findOne({ supplier: supplierId, _id: warehouseId }, projection);
+    if (supplier) res.status(CODES.GET.success).json(supplier);
+    else res.status(CODES.GET.failure.NotFound).json(makeErrorMessage(CODES.GET.failure.NotFound, 'Warehouse with provided id was not found'));
+});
+
+warehouseRouter.put('/warehouse/:warehouseId', authorizationMiddleware, relationMiddleware, async (req: Request, res: Response) => {
     if (!req.body) {
-        res.status(CODES.PUT.failure.BadRequest).json({ message: 'Request body was not provided' });
+        res.status(CODES.PUT.failure.BadRequest).json(makeErrorMessage(CODES.PUT.failure.BadRequest, 'Request body was not provided'));
         return;
     }
     const { warehouseId, supplierId } = req.params;
     if (!isValidObjectId(warehouseId)) {
-        res.status(CODES.PUT.failure.BadRequest).json({ message: 'Warehouse id is not valid' });
+        res.status(CODES.PUT.failure.BadRequest).json(makeErrorMessage(CODES.PUT.failure.BadRequest, 'Warehouse id is not valid object id'));
         return;
     }
     const { location, sizeSquareMeters } = req.body;
@@ -86,17 +127,18 @@ warehouseRouter.put('/warehouse/:warehouseId', authorizationMiddleware, async (r
         !params.every((param) => validKeys.put.includes(param))
     ) {
         if (location && (await Warehouse.findOne({ location: location }))) {
-            res.status(CODES.PUT.failure.UnprocessableRequest).json({ messsage: 'Another warehouse is registered for the requested location' });
+            res.status(CODES.PUT.failure.UnprocessableRequest).json(
+                makeErrorMessage(CODES.PUT.failure.UnprocessableRequest, 'Another warehouse is registered for the requested location')
+            );
             return;
         }
 
-        res.status(CODES.PUT.failure.BadRequest).json({ message: 'Body is malformed' });
+        res.status(CODES.PUT.failure.BadRequest).json(makeErrorMessage(CODES.PUT.failure.BadRequest, 'Body is malformed'));
         return;
     }
-
-    const warehouse = await Warehouse.findOne({ id: warehouseId, supplier: supplierId });
+    const warehouse = await Warehouse.findOne({ _id: warehouseId, supplier: supplierId });
     if (!warehouse) {
-        res.status(CODES.PUT.failure.NotFound).json({ message: 'Warehouse with provided id was not found' });
+        res.status(CODES.PUT.failure.NotFound).json(makeErrorMessage(CODES.PUT.failure.NotFound, 'Warehouse with provided id was not found'));
         return;
     } else {
         if (location !== undefined) warehouse.location = location;
@@ -106,9 +148,9 @@ warehouseRouter.put('/warehouse/:warehouseId', authorizationMiddleware, async (r
     }
 });
 
-warehouseRouter.post('/warehouse', authorizationMiddleware, async (req: Request, res: Response) => {
+warehouseRouter.post('/warehouse', authorizationMiddleware, relationMiddleware, async (req: Request, res: Response) => {
     if (!req.body) {
-        res.status(CODES.PUT.failure.BadRequest).json({ message: 'Malformed body' });
+        res.status(CODES.POST.failure.BadRequest).json(makeErrorMessage(CODES.POST.failure.BadRequest, 'Body was not provided'));
         return;
     }
     const { supplierId } = req.params;
@@ -116,41 +158,43 @@ warehouseRouter.post('/warehouse', authorizationMiddleware, async (req: Request,
 
     if (
         (Object.keys(rest).length !== 0,
-        Object.keys(req.body).length !== 3 ||
+        Object.keys(req.body).length !== 2 ||
             !isValidParam(supplierId, 'objID') ||
             !isValidParam(location, 'string') ||
             !isValidParam(sizeSquareMeters, 'number'))
     ) {
-        res.status(CODES.POST.failure.BadRequest).json({ message: 'Malformed body' });
+        res.status(CODES.POST.failure.BadRequest).json(makeErrorMessage(CODES.POST.failure.BadRequest, 'Malformed body'));
         return;
     }
     const existingSupplier = await Supplier.findById(supplierId);
     if (!existingSupplier) {
-        res.status(CODES.POST.failure.UnprocessableRequest).json({ message: 'Supplier with this id was not found' });
+        res.status(CODES.POST.failure.BadRequest).json(makeErrorMessage(CODES.POST.failure.BadRequest, 'Supplier with this id does not exist'));
         return;
     }
     const existingWarehouse = await Warehouse.findOne({ location: location });
     if (existingWarehouse) {
-        res.status(CODES.POST.failure.UnprocessableRequest).json({ message: 'Warehouse in this location already exists' });
+        res.status(CODES.POST.failure.UnprocessableRequest).json(
+            makeErrorMessage(CODES.POST.failure.UnprocessableRequest, 'Warehouse in this location already exists')
+        );
         return;
     }
     await Warehouse.create({ supplier: existingSupplier._id, location: location, sizeSquareMeters: sizeSquareMeters });
-    res.status(CODES.PUT.success).send();
+    res.status(CODES.POST.success).send();
 });
 
-warehouseRouter.delete('/warehouse/:warehouseId', authorizationMiddleware, async (req: Request, res: Response) => {
+warehouseRouter.delete('/warehouse/:warehouseId', authorizationMiddleware, relationMiddleware, async (req: Request, res: Response) => {
     const { warehouseId, supplierId } = req.params;
     if (!isValidObjectId(warehouseId)) {
-        res.status(CODES.DELETE.failure.BadRequest).json({ message: 'Warehouse id is not valid' });
+        res.status(CODES.DELETE.failure.BadRequest).json(makeErrorMessage(CODES.DELETE.failure.BadRequest, 'Warehouse id is not valid'));
         return;
     }
     if (!isValidObjectId(supplierId)) {
-        res.status(CODES.DELETE.failure.BadRequest).json({ message: 'Supplier id is not valid' });
+        res.status(CODES.DELETE.failure.BadRequest).json(makeErrorMessage(CODES.DELETE.failure.BadRequest, 'Supplier id is not valid'));
         return;
     }
-    const result = await Warehouse.findOne({ id: warehouseId, supplier: supplierId });
+    const result = await Warehouse.findOne({ _id: warehouseId, supplier: supplierId });
     if (!result) {
-        res.status(CODES.DELETE.failure.NotFound).json({ message: 'Warehouse with provided id was not found' });
+        res.status(CODES.DELETE.failure.NotFound).json(makeErrorMessage(CODES.DELETE.failure.NotFound, 'Warehouse with provided id was not found'));
         return;
     }
 
@@ -160,6 +204,6 @@ warehouseRouter.delete('/warehouse/:warehouseId', authorizationMiddleware, async
     res.status(CODES.DELETE.success.withoutBody).send();
 });
 
-warehouseRouter.use('/warehouse/:warehouseId', goodRouter);
+warehouseRouter.use('/warehouse/:warehouseId', relationMiddleware, goodRouter);
 
 export default warehouseRouter;

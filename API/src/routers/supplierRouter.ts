@@ -2,7 +2,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { StatusCodes as CODES } from './statusCodes';
 import { Supplier, Warehouse, Good, ISupplier } from '../Schemas';
 import { isValidObjectId } from 'mongoose';
-import { isValidParam } from '../sharedFunctions';
+import { isValidParam, makeErrorMessage } from '../sharedFunctions';
 import { Role, ValidRoles } from '../constants';
 import { EndpointAccessType } from '../types';
 import warehouseRouter from './warehouseRouter';
@@ -12,28 +12,28 @@ const validKeys = {
 };
 
 const projection = { id: 1, name: 1, description: 1, rating: 1 };
-const rolesWithEndpoints: EndpointAccessType = {
-    GET: {
-        [Role.ADMIN]: true,
-        [Role.SUPPLIER]: false,
-        [Role.WAREHOUSE]: false,
-    },
-    POST: {
-        [Role.ADMIN]: true,
-        [Role.SUPPLIER]: false,
-        [Role.WAREHOUSE]: false,
-    },
-    PUT: {
-        [Role.ADMIN]: true,
-        [Role.SUPPLIER]: false,
-        [Role.WAREHOUSE]: false,
-    },
-    DELETE: {
-        [Role.ADMIN]: true,
-        [Role.SUPPLIER]: false,
-        [Role.WAREHOUSE]: false,
-    },
-};
+// const rolesWithEndpoints: EndpointAccessType = {
+//     GET: {
+//         [Role.ADMIN]: true,
+//         [Role.SUPPLIER]: false,
+//         [Role.WAREHOUSE]: false,
+//     },
+//     POST: {
+//         [Role.ADMIN]: true,
+//         [Role.SUPPLIER]: false,
+//         [Role.WAREHOUSE]: false,
+//     },
+//     PUT: {
+//         [Role.ADMIN]: true,
+//         [Role.SUPPLIER]: false,
+//         [Role.WAREHOUSE]: false,
+//     },
+//     DELETE: {
+//         [Role.ADMIN]: true,
+//         [Role.SUPPLIER]: false,
+//         [Role.WAREHOUSE]: false,
+//     },
+// };
 const authorizationMiddleware = (req: Request, res: Response, next: NextFunction) => {
     // const { role } = req.query;
     // if (!role || !ValidRoles.includes(Number(role))) {
@@ -57,22 +57,24 @@ supplierRouter.get('/supplier', authorizationMiddleware, async (req: Request, re
 supplierRouter.get('/supplier/:supplierId', authorizationMiddleware, async (req: Request, res: Response) => {
     const { supplierId } = req.params;
     if (!isValidObjectId(supplierId)) {
-        res.status(CODES.PUT.failure.BadRequest).send({ message: 'Supplier id was not provided or is not a valid object id' });
+        res.status(CODES.GET.failure.BadRequest).json(
+            makeErrorMessage(CODES.GET.failure.BadRequest, 'Supplier id was not provided or is not a valid object id')
+        );
         return;
     }
     const supplier = await Supplier.findById(supplierId, projection);
     if (supplier) res.status(CODES.GET.success).json(supplier);
-    else res.status(CODES.GET.failure.NotFound).json({ message: 'Supplier with provided id was not found' });
+    else res.status(CODES.GET.failure.NotFound).json(makeErrorMessage(CODES.GET.failure.NotFound, 'Suppplier with provided if was not found'));
 });
 
 supplierRouter.put('/supplier/:supplierId', authorizationMiddleware, async (req: Request, res: Response) => {
     if (!req.body) {
-        res.status(CODES.PUT.failure.BadRequest).json({ message: 'Request body was not provided' });
+        res.status(CODES.PUT.failure.BadRequest).json(makeErrorMessage(CODES.PUT.failure.BadRequest, 'Request body was not provided'));
         return;
     }
     const { supplierId } = req.params;
     if (!isValidObjectId(supplierId)) {
-        res.status(CODES.PUT.failure.BadRequest).json({ message: 'Supplier id is not valid' });
+        res.status(CODES.PUT.failure.BadRequest).json(makeErrorMessage(CODES.PUT.failure.BadRequest, 'Supplier id is not valid'));
         return;
     }
     const { name, description, rating } = req.body;
@@ -85,13 +87,13 @@ supplierRouter.put('/supplier/:supplierId', authorizationMiddleware, async (req:
         (rating !== undefined && rating !== null && !isValidParam(rating, 'number')) ||
         !params.every((param) => validKeys.put.includes(param))
     ) {
-        res.status(CODES.PUT.failure.BadRequest).json({ message: 'Body is malformed' });
+        res.status(CODES.PUT.failure.BadRequest).json(makeErrorMessage(CODES.PUT.failure.BadRequest, 'Malformed body'));
         return;
     }
 
     const supplier = await Supplier.findById(supplierId);
     if (!supplier) {
-        res.status(CODES.PUT.failure.NotFound).json({ message: 'Supplier with provided id was not found' });
+        res.status(CODES.PUT.failure.NotFound).json(makeErrorMessage(CODES.PUT.failure.NotFound, 'Supplier with provided id was not found'));
         return;
     } else {
         if (name !== undefined) supplier.name = name;
@@ -104,7 +106,7 @@ supplierRouter.put('/supplier/:supplierId', authorizationMiddleware, async (req:
 
 supplierRouter.post('/supplier', authorizationMiddleware, async (req: Request, res: Response) => {
     if (!req.body) {
-        res.status(CODES.PUT.failure.BadRequest).json({ message: 'Malformed body' });
+        res.status(CODES.POST.failure.BadRequest).json(makeErrorMessage(CODES.POST.failure.BadRequest, 'No body provided'));
         return;
     }
     const { name, description, rating, ...rest } = req.body;
@@ -116,28 +118,30 @@ supplierRouter.post('/supplier', authorizationMiddleware, async (req: Request, r
             !isValidParam(description, 'string') ||
             !isValidParam(rating, 'number'))
     ) {
-        res.status(CODES.POST.failure.BadRequest).json({ message: 'Malformed body' });
+        res.status(CODES.POST.failure.BadRequest).json(makeErrorMessage(CODES.POST.failure.BadRequest, 'Malformed body'));
         return;
     }
 
     const existingSupplier = await Supplier.findOne({ name: name });
     if (existingSupplier) {
-        res.status(CODES.POST.failure.UnprocessableRequest).json({ message: 'Supplier with this name already exists' });
+        res.status(CODES.POST.failure.UnprocessableRequest).json(
+            makeErrorMessage(CODES.POST.failure.UnprocessableRequest, 'Supplier with this name already exists')
+        );
         return;
     }
     await Supplier.create({ name: name, description: description, rating: rating });
-    res.status(CODES.PUT.success).send();
+    res.status(CODES.POST.success).send();
 });
 
 supplierRouter.delete('/supplier/:supplierId', authorizationMiddleware, async (req: Request, res: Response) => {
     const { supplierId } = req.params;
     if (!isValidObjectId(supplierId)) {
-        res.status(CODES.DELETE.failure.BadRequest).json({ message: 'Supplier id is not valid' });
+        res.status(CODES.DELETE.failure.BadRequest).json(makeErrorMessage(CODES.DELETE.failure.BadRequest, 'Supplier id is not valid'));
         return;
     }
     const result = await Supplier.findById(supplierId);
     if (!result) {
-        res.status(CODES.DELETE.failure.NotFound).json({ message: 'Supplier with provided id was not found' });
+        res.status(CODES.DELETE.failure.NotFound).json(makeErrorMessage(CODES.DELETE.failure.NotFound, 'Supplier with provided id was not found'));
         return;
     }
 
