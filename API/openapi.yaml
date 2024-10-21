@@ -1,0 +1,873 @@
+openapi: 3.0.0
+info:
+    title: Supplier, Warehouse, and Good Management API
+    version: 1.0.0
+    description: API for managing suppliers, warehouses, and goods
+
+servers:
+    - url: /api/v1 # Replace with your actual base path
+
+components:
+    schemas:
+        supplier:
+            type: object
+            properties:
+                _id:
+                    type: string
+                name:
+                    type: string
+                description:
+                    type: string
+                rating:
+                    type: string
+        postSupplier:
+            type: object
+            properties:
+                name:
+                    type: string
+                description:
+                    type: string
+                rating:
+                    type: number
+
+        warehouse:
+            type: object
+            properties:
+                _id:
+                    type: string
+                supplier:
+                    type: string
+                location:
+                    type: string
+                sizeSquareMeters:
+                    type: number
+        postWarehouse:
+            type: object
+            properties:
+                location:
+                    type: string
+                sizeSquareMeters:
+                    type: number
+        good:
+            type: object
+            properties:
+                _id:
+                    type: string
+                warehouse:
+                    type: string
+                name:
+                    type: string
+                description:
+                    type: string
+        postGood:
+            type: object
+            properties:
+                name:
+                    type: string
+                description:
+                    type: string
+        error:
+            type: object
+            properties:
+                code:
+                    type: number
+                title:
+                    type: string
+                details:
+                    type: string
+
+paths:
+    /supplier:
+        get:
+            summary: List all suppliers
+            tags:
+                - Supplier
+            responses:
+                '200':
+                    description: Successful operation
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: '#/components/schemas/supplier'
+                            example:
+                                - _id: '6711549715d86595bf6713a4'
+                                  name: 'UAB DEŠRELĖS'
+                                  description: 'Desšrelių tiekėjas'
+                                  rating: 2
+                                - _id: '671167bfc618eac8edafca78'
+                                  name: 'UAB KAUNO GRŪDAI'
+                                  description: 'Grūdų tiekėjas'
+                                  rating: 5
+
+            security:
+                - bearerAuth: []
+
+        post:
+            summary: Create a new supplier
+            tags:
+                - Supplier
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/supplier'
+                        example:
+                            name: 'TESTSupplier'
+                            description: 'TESTSUPP'
+                            rating: 0
+
+            responses:
+                '201':
+                    description: Supplier created successfully
+                '400':
+                    description: Bad Request - Invalid data provided
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                items:
+                                    $ref: '#/components/schemas/error'
+                            example:
+                                code: 422
+                                title: Bad Request
+                                details: Malformed Body
+                '422':
+                    description: Conflict - Supplier with the same name already exists
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                items:
+                                    $ref: '#/components/schemas/error'
+                            example:
+                                code: 422
+                                title: Unprocessable Entity
+                                details: Supplier with this name already exists
+
+            security:
+                - bearerAuth: []
+
+    /supplier/{supplierId}:
+        get:
+            summary: Get a supplier by ID
+            tags:
+                - Supplier
+            parameters:
+                - name: supplierId
+                  in: path
+                  required: true
+                  schema:
+                      type: string
+                  example: 6711549715d86595bf6713a4
+            responses:
+                '200':
+                    description: Successful operation
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/supplier'
+                                type: object
+
+                            example:
+                                _id: '6711549715d86595bf6713a4'
+                                name: 'UAB DEŠRELĖS'
+                                description: 'Desšrelių tiekėjas'
+                                rating: 2
+
+                '400':
+                    description: Bad Request - Invalid supplier ID provided
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                items:
+                                    $ref: '#/components/schemas/error'
+                            example:
+                                code: 400
+                                title: Bad Request
+                                details: Supplier id was not provided or is not a valid object id
+                '404':
+                    description: Not Found - Supplier with the provided ID not found
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                items:
+                                    $ref: '#/components/schemas/error'
+                            example:
+                                code: 404
+                                title: Not Found
+                                details: Supplier with this id was not found
+            security:
+                - bearerAuth: []
+
+        put:
+            summary: Update a supplier by ID
+            tags:
+                - Supplier
+            parameters:
+                - name: supplierId
+                  in: path
+                  required: true
+                  schema:
+                      type: string
+                      example: 6711549715d86595bf6713a4
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/postSupplier'
+                        examples:
+                            All parameters:
+                                value:
+                                    name: 'New Name'
+                                    description: 'New description'
+                                    rating: 5
+                                description: While providing all parameters
+                            Partial parameters:
+                                description: While providing few parameters
+                                value:
+                                    description: 'New description'
+
+            responses:
+                '200':
+                    description: Supplier updated successfully
+                '400':
+                    description: Bad Request - Invalid data provided
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                items:
+                                    $ref: '#/components/schemas/error'
+                            example:
+                                code: 400
+                                title: Bad Request
+                                details: Supplier id was not provided or is not a valid object id
+                '404':
+                    description: Not Found - Supplier with the provided ID not found
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                items:
+                                    $ref: '#/components/schemas/error'
+                            example:
+                                code: 404
+                                title: Not Found
+                                details: Supplier with this id was not found
+            security:
+                - bearerAuth: []
+
+        delete:
+            summary: Delete a supplier by ID
+            tags:
+                - Supplier
+            parameters:
+                - name: supplierId
+                  in: path
+                  required: true
+                  schema:
+                      type: string
+                  example: 6711549715d86595bf6713a4
+            responses:
+                '204':
+                    description: Supplier deleted successfully
+                '400':
+                    description: Bad Request - Invalid supplier ID provided
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                items:
+                                    $ref: '#/components/schemas/error'
+                            example:
+                                code: 400
+                                title: Bad Request
+                                details: Supplier id was not provided or is not a valid object id
+                '404':
+                    description: Not Found - Supplier with the provided ID not found
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                items:
+                                    $ref: '#/components/schemas/error'
+                            example:
+                                code: 404
+                                title: Not Found
+                                details: Supplier with provided id was not found
+            security:
+                - bearerAuth: []
+
+    /supplier/{supplierId}/warehouse:
+        get:
+            summary: List all warehouses for a supplier
+            tags:
+                - Warehouse
+            parameters:
+                - name: supplierId
+                  in: path
+                  required: true
+                  schema:
+                      type: string
+                  example: 6711549715d86595bf6713a4
+            responses:
+                '200':
+                    description: Successful operation
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: '#/components/schemas/warehouse'
+                                example:
+                                    - _id: '67116b1157cb3574f2331500'
+                                      supplier: '6711549715d86595bf6713a4'
+                                      location: 'Varnių g. 8 Vilnius'
+                                      sizeSquareMeters: 452
+                                    - _id: '67116b1757cb3574f2331504'
+                                      supplier: '6711549715d86595bf6713a4'
+                                      location: 'Varnių g. 9 Vilnius'
+                                      sizeSquareMeters: 319
+                '400':
+                    description: Bad request
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                items:
+                                    $ref: '#/components/schemas/error'
+                                example:
+                                    code: 400
+                                    title: Bad Request
+                                    details: Supplier id is not a valid object id
+
+            security:
+                - bearerAuth: []
+
+        post:
+            summary: Create a new warehouse for a supplier
+            tags:
+                - Warehouse
+            parameters:
+                - name: supplierId
+                  in: path
+                  required: true
+                  schema:
+                      type: string
+                  example: 6711549715d86595bf6713a4
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            items:
+                                $ref: '#/components/schemas/postWarehouse'
+                            example:
+                                location: Varpo g.4 Vilnius
+                                sizeSquareMeters: 59
+
+            responses:
+                '201':
+                    description: Warehouse created successfully
+                '400':
+                    description: Bad Request - Invalid data provided
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                items:
+                                    $ref: '#/components/schemas/error'
+                                example:
+                                    code: 400
+                                    title: Bad Request
+                                    details: Supplier or warehouse id is not a valid object id
+                '404':
+                    description: Not Found - Supplier with the provided ID not found
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                items:
+                                    $ref: '#/components/schemas/error'
+                                example:
+                                    code: 404
+                                    title: Not Found
+                                    details: Warehouse with specified id was not found
+                '422':
+                    description: Unprocessable Entry - Warehouse with the same location already exists for the supplier
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                items:
+                                    $ref: '#/components/schemas/error'
+                                example:
+                                    code: 422
+                                    title: Unprocessable Entry
+                                    details: Warehouse in this location is already registered
+            security:
+                - bearerAuth: []
+
+    /supplier/{supplierId}/warehouse/{warehouseId}:
+        get:
+            summary: Get a warehouse by ID for a supplier
+            tags:
+                - Warehouse
+            parameters:
+                - name: supplierId
+                  in: path
+                  required: true
+                  schema:
+                      type: string
+                  example: 6711549715d86595bf6713a4
+                - name: warehouseId
+                  in: path
+                  required: true
+                  schema:
+                      type: string
+                  example: 6711549715d86595bf6713a4
+            responses:
+                '200':
+                    description: Successful operation
+                '400':
+                    description: Bad Request - Invalid supplier ID or warehouse ID provided
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                items:
+                                    $ref: '#/components/schemas/error'
+                                example:
+                                    code: 400
+                                    title: Bad request
+                                    details: Warehouse id is not a valid object id
+
+                '404':
+                    description: Not Found - Warehouse with the provided ID not found for the supplier
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                items:
+                                    $ref: '#/components/schemas/error'
+                                example:
+                                    code: 404
+                                    title: Not Found
+                                    details: Warehouse with specified id was not found
+            security:
+                - bearerAuth: []
+
+        put:
+            summary: Update a warehouse by ID for a supplier
+            tags:
+                - Warehouse
+            parameters:
+                - name: supplierId
+                  in: path
+                  required: true
+                  schema:
+                      type: string
+                  example: 6711549715d86595bf6713a4
+                - name: warehouseId
+                  in: path
+                  required: true
+                  schema:
+                      type: string
+                  example: 6711549715d86595bf6713a4
+
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/postWarehouse'
+                        examples:
+                            All parameters:
+                                description: 'All parameters provided'
+                                value:
+                                    location: Varnių g.9B Kaunas
+                                    sizeInSquareMeters: 29
+                            Partial parameters:
+                                value:
+                                    location: Varnių g.8B Kaunas
+                                description: 'Partial parameters provided'
+            responses:
+                '200':
+                    description: Warehouse updated successfully
+                '400':
+                    description: Bad Request - Invalid data provided
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                items:
+                                    $ref: '#/components/schemas/error'
+                                example:
+                                    code: 400
+                                    title: Bad request
+                                    details: Warehouse id is not a valid object id
+                '404':
+                    description: Not Found - Warehouse with the provided ID not found for the supplier
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                items:
+                                    $ref: '#/components/schemas/error'
+                                example:
+                                    code: 404
+                                    title: Not Found
+                                    details: Warehouse with specified id was not found
+                '422':
+                    description: Unprocessable Entry - Warehouse with the same location already exists for the supplier
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                items:
+                                    $ref: '#/components/schemas/error'
+                                example:
+                                    code: 422
+                                    title: Unprocessable Entry
+                                    details: Warehouse in this location is already registered
+            security:
+                - bearerAuth: []
+
+        delete:
+            summary: Delete a warehouse by ID for a supplier
+            tags:
+                - Warehouse
+            parameters:
+                - name: supplierId
+                  in: path
+                  required: true
+                  schema:
+                      type: string
+                  example: 6711549715d86595bf6713a4
+
+                - name: warehouseId
+                  in: path
+                  required: true
+                  schema:
+                      type: string
+                  example: 6711549715d86595bf6713a4
+
+            responses:
+                '204':
+                    description: Warehouse deleted successfully
+                '400':
+                    description: Bad Request - Invalid supplier ID or warehouse ID provided
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                items:
+                                    $ref: '#/components/schemas/error'
+                                example:
+                                    code: 400
+                                    title: Bad request
+                                    details: Warehouse id is not a valid object id
+                '404':
+                    description: Not Found - Warehouse with the provided ID not found for the supplier
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                items:
+                                    $ref: '#/components/schemas/error'
+                                example:
+                                    code: 404
+                                    title: Not Found
+                                    details: Warehouse with specified id was not found
+            security:
+                - bearerAuth: []
+
+    /supplier/{supplierId}/warehouse/{warehouseId}/good:
+        get:
+            summary: List all goods for a warehouse
+            tags:
+                - Good
+            parameters:
+                - name: supplierId
+                  in: path
+                  required: true
+                  schema:
+                      type: string
+                  example: 6711549715d86595bf6713a4
+                - name: warehouseId
+                  in: path
+                  required: true
+                  schema:
+                      type: string
+                  example: 6711549715d86595bf6713a4
+            responses:
+                '200':
+                    description: Successful operation
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: '#/components/schemas/good'
+                                example:
+                                    - _id: '67116bdc57cb3574f233150b'
+                                      warehouse: '67116b1157cb3574f2331500'
+                                      name: 'Giminių dešrelės'
+                                      description: 'Skanios dešrelės'
+                                    - _id: '67116be157cb3574f233150e'
+                                      warehouse: '67116b1157cb3574f2331500'
+                                      name: 'Samsono dešrelės'
+                                      description: 'Skanios dešrelės'
+            security:
+                - bearerAuth: []
+
+        post:
+            summary: Create a new good for a warehouse
+            tags:
+                - Good
+            parameters:
+                - name: supplierId
+                  in: path
+                  required: true
+                  schema:
+                      type: string
+                  example: 6711549715d86595bf6713a4
+                - name: warehouseId
+                  in: path
+                  required: true
+                  schema:
+                      type: string
+                  example: 6711549715d86595bf6713a4
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/postGood'
+                        example:
+                            name: Good Name
+                            description: Good description
+            responses:
+                '201':
+                    description: Good created successfully
+                '400':
+                    description: Bad Request - Invalid data provided
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                items:
+                                    $ref: '#/components/schemas/error'
+                                example:
+                                    code: 400
+                                    title: Bad request
+                                    details: Malformed body
+                '404':
+                    description: Not Found - Warehouse with the provided ID not found for the supplier
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                items:
+                                    $ref: '#/components/schemas/error'
+                                example:
+                                    code: 404
+                                    title: Not Found
+                                    details: Warehouse with specified id was not found
+            security:
+                - bearerAuth: []
+
+    /supplier/{supplierId}/warehouse/{warehouseId}/good/{goodId}:
+        get:
+            summary: Get a good by ID for a warehouse
+            tags:
+                - Good
+            parameters:
+                - name: supplierId
+                  in: path
+                  required: true
+                  schema:
+                      type: string
+                  example: 6711549715d86595bf6713a4
+                - name: warehouseId
+                  in: path
+                  required: true
+                  schema:
+                      type: string
+                  example: 6711549715d86595bf6713a4
+                - name: goodId
+                  in: path
+                  required: true
+                  schema:
+                      type: string
+                  example: 6711549715d86595bf6713a4
+            responses:
+                '200':
+                    description: Successful
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                items:
+                                    $ref: '#/components/schemas/error'
+                                example:
+                                    _id: '67116bdc57cb3574f233150b'
+                                    warehouse: '67116b1157cb3574f2331500'
+                                    name: 'Giminių dešrelės'
+                                    description: 'Skanios dešrelės'
+                '400':
+                    description: Bad Request - Invalid object id provided
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                items:
+                                    $ref: '#/components/schemas/error'
+                                example:
+                                    code: 400
+                                    title: Bad request
+                                    details: Good/Supplier/Warehouse id is not a valid object id or realtion herarchy was broken
+                '404':
+                    description: Good was not found
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                items:
+                                    $ref: '#/components/schemas/error'
+                                example:
+                                    code: 404
+                                    title: Not Found
+                                    details: Warehouse with specified id was not found
+            security:
+                - bearerAuth: []
+        put:
+            summary: Update a good by ID for a warehouse
+            tags:
+                - Good
+            parameters:
+                - name: supplierId
+                  in: path
+                  required: true
+                  schema:
+                      type: string
+                  example: 6711549715d86595bf6713a4
+                - name: warehouseId
+                  in: path
+                  required: true
+                  schema:
+                      type: string
+                  example: 6711549715d86595bf6713a4
+                - name: goodId
+                  schema:
+                      type: string
+                  in: path
+                  required: true
+                  example: 6711549715d86595bf6713a4
+
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/postGood'
+                        examples:
+                            All parameters:
+                                description: 'All parameters provided'
+                                value:
+                                    name: 'TEST GOOD'
+                                    description: 'This is test good'
+                            Partial parameters:
+                                value:
+                                    name: New name
+            responses:
+                '200':
+                    description: Good updated successfully
+                '400':
+                    description: Bad Request - Invalid data provided
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                items:
+                                    $ref: '#/components/schemas/error'
+                                example:
+                                    code: 400
+                                    title: Bad request
+                                    details: Good id is not a valid object id
+                '404':
+                    description: Not Found - Warehouse with the provided ID not found for the supplier
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                items:
+                                    $ref: '#/components/schemas/error'
+                                example:
+                                    code: 404
+                                    title: Not Found
+                                    details: Good with specified id was not found
+            security:
+                - bearerAuth: []
+
+        delete:
+            summary: Delete a good by ID for a warehouse
+            tags:
+                - Good
+            parameters:
+                - name: supplierId
+                  in: path
+                  required: true
+                  schema:
+                      type: string
+                  example: 6711549715d86595bf6713a4
+
+                - name: warehouseId
+                  in: path
+                  required: true
+                  schema:
+                      type: string
+                  example: 6711549715d86595bf6713a4
+                - name: goodId
+                  schema:
+                      type: string
+                  in: path
+                  required: true
+                  example: 6711549715d86595bf6713a4
+
+            responses:
+                '204':
+                    description: Good deleted successfully
+                '400':
+                    description: Bad Request - Invalid supplier ID or warehouse ID provided
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                items:
+                                    $ref: '#/components/schemas/error'
+                                example:
+                                    code: 400
+                                    title: Bad request
+                                    details: Good id is not a valid object id
+                '404':
+                    description: Not Found - Good with the provided ID not found for the supplier
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                items:
+                                    $ref: '#/components/schemas/error'
+                                example:
+                                    code: 404
+                                    title: Not Found
+                                    details: Good with specified id was not found
+            security:
+                - bearerAuth: []

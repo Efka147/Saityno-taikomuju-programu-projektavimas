@@ -7,7 +7,7 @@ import { Role, ValidRoles } from '../constants';
 import { EndpointAccessType } from '../types';
 const goodRouter = Router({ mergeParams: true });
 const validKeys = {
-    put: ['warehouse', 'name', 'description'],
+    put: ['name', 'description'],
 };
 
 const projection = { id: 1, warehouse: 1, name: 1, description: 1 };
@@ -143,7 +143,7 @@ goodRouter.post('/good', authorizationMiddleware, relationMiddleware, async (req
     const { name, description, ...rest } = req.body;
 
     if (
-        (Object.keys(rest).length !== 0, Object.keys(req.body).length !== 3 || !isValidParam(name, 'string') || !isValidParam(description, 'string'))
+        (Object.keys(rest).length !== 0, Object.keys(req.body).length !== 2 || !isValidParam(name, 'string') || !isValidParam(description, 'string'))
     ) {
         res.status(CODES.POST.failure.BadRequest).json(makeErrorMessage(CODES.POST.failure.BadRequest, 'Malformed Body'));
         return;
