@@ -1,8 +1,3 @@
-import { Role } from './constants';
+import { Roles } from './db/schemas';
 
-export type EndpointAccessType = {
-    POST: { [key in Role]: boolean };
-    DELETE: { [key in Role]: boolean };
-    GET: { [key in Role]: boolean };
-    PUT: { [key in Role]: boolean };
-};
+export type EndpointAccessType = { [key: string]: { [key in Roles]: boolean } };

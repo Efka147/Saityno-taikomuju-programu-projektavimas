@@ -1,5 +1,11 @@
 import { model, Schema, Document, Types } from 'mongoose';
-
+export { User, IUser } from './userScheme';
+export { Session, ISession } from './sessionScheme';
+export enum Roles {
+    ADMIN = 'admin',
+    SUPPLIER = 'supplier',
+    WAREHOUSE = 'warehouse',
+}
 export interface ISupplier extends Document {
     name: string;
     description: string;

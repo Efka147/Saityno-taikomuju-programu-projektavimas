@@ -28,7 +28,12 @@ export const StatusCodes = {
         success: SucessCodes.DELETE,
     },
     AUTH: {
-        Unauthorized: 403,
+        Unauthorized: 401,
+        Forbidden: 403,
         BadRequest: 400,
+        UnprocessableEntry: 422,
+        Logout: 200,
+        AccessToken: 200,
+        Renew: 200,
     },
 };

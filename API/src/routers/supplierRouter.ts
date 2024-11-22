@@ -1,53 +1,56 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { StatusCodes as CODES } from './statusCodes';
-import { Supplier, Warehouse, Good, ISupplier } from '../Schemas';
+import { Supplier, Warehouse, Good, User } from '../db/schemas';
 import { isValidObjectId } from 'mongoose';
-import { isValidParam, makeErrorMessage } from '../sharedFunctions';
-import { Role, ValidRoles } from '../constants';
-import { EndpointAccessType } from '../types';
+import { isValidParam, makeErrorMessage, parsePayload } from '../sharedFunctions';
+import { Roles } from '../db/schemas';
 import warehouseRouter from './warehouseRouter';
+import { EndpointAccessType } from '../types';
 const supplierRouter = Router();
 const validKeys = {
     put: ['name', 'description', 'rating'],
 };
 
 const projection = { id: 1, name: 1, description: 1, rating: 1 };
-// const rolesWithEndpoints: EndpointAccessType = {
-//     GET: {
-//         [Role.ADMIN]: true,
-//         [Role.SUPPLIER]: false,
-//         [Role.WAREHOUSE]: false,
-//     },
-//     POST: {
-//         [Role.ADMIN]: true,
-//         [Role.SUPPLIER]: false,
-//         [Role.WAREHOUSE]: false,
-//     },
-//     PUT: {
-//         [Role.ADMIN]: true,
-//         [Role.SUPPLIER]: false,
-//         [Role.WAREHOUSE]: false,
-//     },
-//     DELETE: {
-//         [Role.ADMIN]: true,
-//         [Role.SUPPLIER]: false,
-//         [Role.WAREHOUSE]: false,
-//     },
-// };
-const authorizationMiddleware = (req: Request, res: Response, next: NextFunction) => {
-    // const { role } = req.query;
-    // if (!role || !ValidRoles.includes(Number(role))) {
-    //     res.status(CODES.AUTH.BadRequest).json({ message: 'Role was not provided or was malformed' });
-    //     return;
-    // }
-    // const method = req.method as keyof EndpointAccessType;
-    // const userRole = Number(role) as Role;
+const rolesWithEndpoints: EndpointAccessType = {
+    GET: {
+        [Roles.ADMIN]: true,
+        [Roles.SUPPLIER]: true,
+        [Roles.WAREHOUSE]: false,
+    },
+    POST: {
+        [Roles.ADMIN]: true,
+        [Roles.SUPPLIER]: false,
+        [Roles.WAREHOUSE]: false,
+    },
+    PUT: {
+        [Roles.ADMIN]: true,
+        [Roles.SUPPLIER]: true,
+        [Roles.WAREHOUSE]: false,
+    },
+    DELETE: {
+        [Roles.ADMIN]: true,
+        [Roles.SUPPLIER]: false,
+        [Roles.WAREHOUSE]: false,
+    },
+};
 
-    // if (!rolesWithEndpoints?.[method][userRole]) {
-    //     res.status(CODES.AUTH.Unauthorized).json({ message: 'Unauthorized' });
-    //     return;
-    // }
-    next();
+const authorizationMiddleware = async (req: Request, res: Response, next: NextFunction) => {
+    const payload = parsePayload(req, res);
+    if (!payload) return;
+    if (payload.aud === Roles.ADMIN) {
+        next();
+        return;
+    }
+    if (rolesWithEndpoints[req.method][payload.aud as Roles]) {
+        const subject = await User.getSubjectId(payload.sub!);
+        const { supplierId } = req.params;
+        if (supplierId === subject) next();
+        else {
+            res.status(CODES.AUTH.Forbidden).json(makeErrorMessage(CODES.AUTH.Forbidden, 'Not allowed'));
+            return;
+        }
+    } else res.status(CODES.AUTH.Forbidden).json(makeErrorMessage(CODES.AUTH.Forbidden, 'Not allowed'));
 };
 
 supplierRouter.get('/supplier', authorizationMiddleware, async (req: Request, res: Response) => {
@@ -57,8 +60,8 @@ supplierRouter.get('/supplier', authorizationMiddleware, async (req: Request, re
 supplierRouter.get('/supplier/:supplierId', authorizationMiddleware, async (req: Request, res: Response) => {
     const { supplierId } = req.params;
     if (!isValidObjectId(supplierId)) {
-        res.status(CODES.GET.failure.BadRequest).json(
-            makeErrorMessage(CODES.GET.failure.BadRequest, 'Supplier id was not provided or is not a valid object id')
+        res.status(CODES.GET.failure.UnprocessableRequest).json(
+            makeErrorMessage(CODES.GET.failure.UnprocessableRequest, 'Supplier id was not provided or is not a valid object id')
         );
         return;
     }
@@ -69,12 +72,14 @@ supplierRouter.get('/supplier/:supplierId', authorizationMiddleware, async (req:
 
 supplierRouter.put('/supplier/:supplierId', authorizationMiddleware, async (req: Request, res: Response) => {
     if (!req.body) {
-        res.status(CODES.PUT.failure.BadRequest).json(makeErrorMessage(CODES.PUT.failure.BadRequest, 'Request body was not provided'));
+        res.status(CODES.PUT.failure.UnprocessableRequest).json(
+            makeErrorMessage(CODES.PUT.failure.UnprocessableRequest, 'Request body was not provided')
+        );
         return;
     }
     const { supplierId } = req.params;
     if (!isValidObjectId(supplierId)) {
-        res.status(CODES.PUT.failure.BadRequest).json(makeErrorMessage(CODES.PUT.failure.BadRequest, 'Supplier id is not valid'));
+        res.status(CODES.PUT.failure.UnprocessableRequest).json(makeErrorMessage(CODES.PUT.failure.UnprocessableRequest, 'Supplier id is not valid'));
         return;
     }
     const { name, description, rating } = req.body;
@@ -87,7 +92,7 @@ supplierRouter.put('/supplier/:supplierId', authorizationMiddleware, async (req:
         (rating !== undefined && rating !== null && !isValidParam(rating, 'number')) ||
         !params.every((param) => validKeys.put.includes(param))
     ) {
-        res.status(CODES.PUT.failure.BadRequest).json(makeErrorMessage(CODES.PUT.failure.BadRequest, 'Malformed body'));
+        res.status(CODES.PUT.failure.UnprocessableRequest).json(makeErrorMessage(CODES.PUT.failure.UnprocessableRequest, 'Malformed body'));
         return;
     }
 
@@ -106,7 +111,7 @@ supplierRouter.put('/supplier/:supplierId', authorizationMiddleware, async (req:
 
 supplierRouter.post('/supplier', authorizationMiddleware, async (req: Request, res: Response) => {
     if (!req.body) {
-        res.status(CODES.POST.failure.BadRequest).json(makeErrorMessage(CODES.POST.failure.BadRequest, 'No body provided'));
+        res.status(CODES.POST.failure.UnprocessableRequest).json(makeErrorMessage(CODES.POST.failure.UnprocessableRequest, 'No body provided'));
         return;
     }
     const { name, description, rating, ...rest } = req.body;
@@ -118,7 +123,7 @@ supplierRouter.post('/supplier', authorizationMiddleware, async (req: Request, r
             !isValidParam(description, 'string') ||
             !isValidParam(rating, 'number'))
     ) {
-        res.status(CODES.POST.failure.BadRequest).json(makeErrorMessage(CODES.POST.failure.BadRequest, 'Malformed body'));
+        res.status(CODES.POST.failure.UnprocessableRequest).json(makeErrorMessage(CODES.POST.failure.UnprocessableRequest, 'Malformed body'));
         return;
     }
 
@@ -136,7 +141,9 @@ supplierRouter.post('/supplier', authorizationMiddleware, async (req: Request, r
 supplierRouter.delete('/supplier/:supplierId', authorizationMiddleware, async (req: Request, res: Response) => {
     const { supplierId } = req.params;
     if (!isValidObjectId(supplierId)) {
-        res.status(CODES.DELETE.failure.BadRequest).json(makeErrorMessage(CODES.DELETE.failure.BadRequest, 'Supplier id is not valid'));
+        res.status(CODES.DELETE.failure.UnprocessableRequest).json(
+            makeErrorMessage(CODES.DELETE.failure.UnprocessableRequest, 'Supplier id is not valid')
+        );
         return;
     }
     const result = await Supplier.findById(supplierId);

@@ -1,4 +1,5 @@
 import supplierRouter from './supplierRouter';
 import warehouseRouter from './warehouseRouter';
 import goodRouter from './goodRouterr';
-export { supplierRouter, warehouseRouter, goodRouter };
+import authRouter from './authRouter';
+export { supplierRouter, warehouseRouter, goodRouter, authRouter };

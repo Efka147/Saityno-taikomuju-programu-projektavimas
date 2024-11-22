@@ -100,7 +100,30 @@ paths:
                                   name: 'UAB KAUNO GRŪDAI'
                                   description: 'Grūdų tiekėjas'
                                   rating: 5
-
+                '403':
+                    description: Forbidden
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                items:
+                                    $ref: '#/components/schemas/error'
+                            example:
+                                code: 403
+                                title: Forbidden
+                                details: Not allowed
+                '401':
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                items:
+                                    $ref: '#/components/schemas/error'
+                            example:
+                                code: 401
+                                title: Unauthorized
+                                details: Not allowed
             security:
                 - bearerAuth: []
 
@@ -146,6 +169,30 @@ paths:
                                 code: 422
                                 title: Unprocessable Entity
                                 details: Supplier with this name already exists
+                '403':
+                    description: Forbidden
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                items:
+                                    $ref: '#/components/schemas/error'
+                            example:
+                                code: 403
+                                title: Forbidden
+                                details: Not allowed
+                '401':
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                items:
+                                    $ref: '#/components/schemas/error'
+                            example:
+                                code: 401
+                                title: Unauthorized
+                                details: Not allowed
 
             security:
                 - bearerAuth: []
@@ -201,6 +248,30 @@ paths:
                                 code: 404
                                 title: Not Found
                                 details: Supplier with this id was not found
+                '403':
+                    description: Forbidden
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                items:
+                                    $ref: '#/components/schemas/error'
+                            example:
+                                code: 403
+                                title: Forbidden
+                                details: Not allowed
+                '401':
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                items:
+                                    $ref: '#/components/schemas/error'
+                            example:
+                                code: 401
+                                title: Unauthorized
+                                details: Not allowed
             security:
                 - bearerAuth: []
 
@@ -260,6 +331,30 @@ paths:
                                 code: 404
                                 title: Not Found
                                 details: Supplier with this id was not found
+                '403':
+                    description: Forbidden
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                items:
+                                    $ref: '#/components/schemas/error'
+                            example:
+                                code: 403
+                                title: Forbidden
+                                details: Not allowed
+                '401':
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                items:
+                                    $ref: '#/components/schemas/error'
+                            example:
+                                code: 401
+                                title: Unauthorized
+                                details: Not allowed
             security:
                 - bearerAuth: []
 
@@ -301,6 +396,30 @@ paths:
                                 code: 404
                                 title: Not Found
                                 details: Supplier with provided id was not found
+                '403':
+                    description: Forbidden
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                items:
+                                    $ref: '#/components/schemas/error'
+                            example:
+                                code: 403
+                                title: Forbidden
+                                details: Not allowed
+                '401':
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                items:
+                                    $ref: '#/components/schemas/error'
+                            example:
+                                code: 401
+                                title: Unauthorized
+                                details: Not allowed
             security:
                 - bearerAuth: []
 
@@ -346,6 +465,30 @@ paths:
                                     code: 400
                                     title: Bad Request
                                     details: Supplier id is not a valid object id
+                '403':
+                    description: Forbidden
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                items:
+                                    $ref: '#/components/schemas/error'
+                            example:
+                                code: 403
+                                title: Forbidden
+                                details: Not allowed
+                '401':
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                items:
+                                    $ref: '#/components/schemas/error'
+                            example:
+                                code: 401
+                                title: Unauthorized
+                                details: Not allowed
 
             security:
                 - bearerAuth: []
@@ -412,6 +555,30 @@ paths:
                                     code: 422
                                     title: Unprocessable Entry
                                     details: Warehouse in this location is already registered
+                '403':
+                    description: Forbidden
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                items:
+                                    $ref: '#/components/schemas/error'
+                            example:
+                                code: 403
+                                title: Forbidden
+                                details: Not allowed
+                '401':
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                items:
+                                    $ref: '#/components/schemas/error'
+                            example:
+                                code: 401
+                                title: Unauthorized
+                                details: Not allowed
             security:
                 - bearerAuth: []
 
@@ -461,6 +628,30 @@ paths:
                                     code: 404
                                     title: Not Found
                                     details: Warehouse with specified id was not found
+                '403':
+                    description: Forbidden
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                items:
+                                    $ref: '#/components/schemas/error'
+                            example:
+                                code: 403
+                                title: Forbidden
+                                details: Not allowed
+                '401':
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                items:
+                                    $ref: '#/components/schemas/error'
+                            example:
+                                code: 401
+                                title: Unauthorized
+                                details: Not allowed
             security:
                 - bearerAuth: []
 
@@ -537,6 +728,30 @@ paths:
                                     code: 422
                                     title: Unprocessable Entry
                                     details: Warehouse in this location is already registered
+                '403':
+                    description: Forbidden
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                items:
+                                    $ref: '#/components/schemas/error'
+                            example:
+                                code: 403
+                                title: Forbidden
+                                details: Not allowed
+                '401':
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                items:
+                                    $ref: '#/components/schemas/error'
+                            example:
+                                code: 401
+                                title: Unauthorized
+                                details: Not allowed
             security:
                 - bearerAuth: []
 
@@ -586,6 +801,30 @@ paths:
                                     code: 404
                                     title: Not Found
                                     details: Warehouse with specified id was not found
+                '403':
+                    description: Forbidden
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                items:
+                                    $ref: '#/components/schemas/error'
+                            example:
+                                code: 403
+                                title: Forbidden
+                                details: Not allowed
+                '401':
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                items:
+                                    $ref: '#/components/schemas/error'
+                            example:
+                                code: 401
+                                title: Unauthorized
+                                details: Not allowed
             security:
                 - bearerAuth: []
 
@@ -625,6 +864,30 @@ paths:
                                       warehouse: '67116b1157cb3574f2331500'
                                       name: 'Samsono dešrelės'
                                       description: 'Skanios dešrelės'
+                '403':
+                    description: Forbidden
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                items:
+                                    $ref: '#/components/schemas/error'
+                            example:
+                                code: 403
+                                title: Forbidden
+                                details: Not allowed
+                '401':
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                items:
+                                    $ref: '#/components/schemas/error'
+                            example:
+                                code: 401
+                                title: Unauthorized
+                                details: Not allowed
             security:
                 - bearerAuth: []
 
@@ -681,6 +944,30 @@ paths:
                                     code: 404
                                     title: Not Found
                                     details: Warehouse with specified id was not found
+                '403':
+                    description: Forbidden
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                items:
+                                    $ref: '#/components/schemas/error'
+                            example:
+                                code: 403
+                                title: Forbidden
+                                details: Not allowed
+                '401':
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                items:
+                                    $ref: '#/components/schemas/error'
+                            example:
+                                code: 401
+                                title: Unauthorized
+                                details: Not allowed
             security:
                 - bearerAuth: []
 
@@ -746,6 +1033,30 @@ paths:
                                     code: 404
                                     title: Not Found
                                     details: Warehouse with specified id was not found
+                '403':
+                    description: Forbidden
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                items:
+                                    $ref: '#/components/schemas/error'
+                            example:
+                                code: 403
+                                title: Forbidden
+                                details: Not allowed
+                '401':
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                items:
+                                    $ref: '#/components/schemas/error'
+                            example:
+                                code: 401
+                                title: Unauthorized
+                                details: Not allowed
             security:
                 - bearerAuth: []
         put:
@@ -814,6 +1125,30 @@ paths:
                                     code: 404
                                     title: Not Found
                                     details: Good with specified id was not found
+                '403':
+                    description: Forbidden
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                items:
+                                    $ref: '#/components/schemas/error'
+                            example:
+                                code: 403
+                                title: Forbidden
+                                details: Not allowed
+                '401':
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                items:
+                                    $ref: '#/components/schemas/error'
+                            example:
+                                code: 401
+                                title: Unauthorized
+                                details: Not allowed
             security:
                 - bearerAuth: []
 
@@ -869,5 +1204,111 @@ paths:
                                     code: 404
                                     title: Not Found
                                     details: Good with specified id was not found
+                '403':
+                    description: Forbidden
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                items:
+                                    $ref: '#/components/schemas/error'
+                            example:
+                                code: 403
+                                title: Forbidden
+                                details: Not allowed
+                '401':
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                items:
+                                    $ref: '#/components/schemas/error'
+                            example:
+                                code: 401
+                                title: Unauthorized
+                                details: Not allowed
             security:
                 - bearerAuth: []
+    /acessToken:
+        post:
+            summary: Get api token
+            tags:
+                - Auth
+            parameters:
+                - name: username
+                  in: path
+                  required: true
+                  schema:
+                      type: string
+                  example: myUsername
+                - name: password
+                  in: path
+                  required: true
+                  schema:
+                      type: string
+                  example: myPassword
+
+            responses:
+                '422':
+                    description: Bad credentials
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                items:
+                                    $ref: '#/components/schemas/error'
+                            example:
+                                code: 422
+                                title: Unprocessable Entity
+                                details: Wrong username or password
+                '200':
+                    description: Successful login
+                    content:
+                        application/json:
+                            example:
+                                accessToken: yourSecretAcessToken
+
+    /refreshToken:
+        post:
+            summary: Refresh token
+            tags:
+                - Auth
+
+            responses:
+                '422':
+                    description: Refresh token expired or user is logged out
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                items:
+                                    $ref: '#/components/schemas/error'
+                            example:
+                                code: 422
+                                title: Unprocessable Entity
+                                details: Session is expired or revoked
+                '200':
+                    description: Successful refresh
+
+    /logout:
+        post:
+            summary: Logout
+            tags:
+                - Auth
+
+            responses:
+                '422':
+                    description: Refresh token cookie was not found
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                items:
+                                    $ref: '#/components/schemas/error'
+                            example:
+                                code: 422
+                                title: Unprocessable Entity
+                                details: Refresh token cookie was not found
+                '200':
+                    description: Successful logout
