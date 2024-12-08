@@ -1,0 +1,13 @@
+.basic-button {
+  padding: 10px 20px; /* Space inside the button */
+  font-size: 16px; /* Text size */
+  border: none; /* Remove the default border */
+  border-radius: 5px; /* Rounded corners */
+  background-color: #007bff; /* Background color */
+  color: white; /* Text color */
+  cursor: pointer; /* Pointer cursor on hover */
+}
+
+.basic-button:hover {
+  background-color: #0056b3; /* Darker shade on hover */
+}
