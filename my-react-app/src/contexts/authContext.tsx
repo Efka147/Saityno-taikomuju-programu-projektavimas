@@ -4,7 +4,7 @@ import { jwtDecode } from "jwt-decode";
 import { Relations, Roles } from "../types";
 
 type AuthContextType = {
-  role: Roles | undefined;
+  role: Roles | undefined | null;
   login: (username: string, password: string) => Promise<Roles | undefined>;
   logout: () => Promise<void>;
   accessToken: string | undefined;
@@ -20,7 +20,7 @@ export const AuthContext = React.createContext<AuthContextType | undefined>(
 );
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [role, setRole] = React.useState<Roles>();
+  const [role, setRole] = React.useState<Roles | null>();
   const [expiresAt, setExpiresAt] = React.useState<number>();
   const [token, setToken] = React.useState<string>();
   const [subject, setSubject] = React.useState<string>();
@@ -50,9 +50,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setRelation(JSON.parse(relation));
       } else {
         localStorage.clear();
+        setRole(null);
       }
     } else {
       localStorage.clear();
+      setRole(null);
     }
   }, []);
 
