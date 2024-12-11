@@ -1,7 +1,7 @@
 import * as React from "react";
-import "./landing.css";
-import Background from "../../components/background";
+import "../index.css";
 import { useNavigate } from "react-router-dom";
+import { Background } from "../components";
 const LandingScreen: React.FC = () => {
   const navigate = useNavigate();
   return (
@@ -22,7 +22,7 @@ const LandingScreen: React.FC = () => {
         }}
       >
         <h2 style={{ color: "white" }}>Produktų valdymas</h2>
-        <button className="basic-button" onClick={() => navigate("/login")}>
+        <button className="blue-button" onClick={() => navigate("/login")}>
           Prisijungti
         </button>
       </div>

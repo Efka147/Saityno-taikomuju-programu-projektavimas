@@ -19,18 +19,18 @@ const getCookie = (req: Request) => {
     }
     return cookieObject?.RefreshToken;
 };
-const generateTokens = (userId: string, role: Roles) => {
+const generateTokens = (userId: string, role: Roles, userRelations: { [key: string]: any }) => {
     const sharedProps = {
         subject: userId,
         audience: role,
         jwtid: nanoid(),
     };
     const now = Math.floor(Date.now() / 1000);
-    const accessToken = jwt.sign({ iat: now }, process.env.JWT_SECRET!, {
+    const accessToken = jwt.sign({ iat: now, relations: userRelations }, process.env.JWT_SECRET!, {
         expiresIn: now + TOKEN_DURATION,
         ...sharedProps,
     });
-    const refreshToken = jwt.sign({ iat: now }, process.env.JWT_SECRET!, {
+    const refreshToken = jwt.sign({ iat: now, relations: userRelations }, process.env.JWT_SECRET!, {
         expiresIn: now + REFRESH_TOKEN_DURATION,
         ...sharedProps,
     });
@@ -44,7 +44,7 @@ authRouter.post('/accessToken/:username/:password', async (req: Request, res: Re
         res.status(CODES.AUTH.UnprocessableEntry).json(makeErrorMessage(CODES.AUTH.UnprocessableEntry, 'Wrong username or password'));
         return;
     }
-    const { accessToken, refreshToken } = generateTokens(user.id, user.role);
+    const { accessToken, refreshToken } = generateTokens(user.id, user.role, user.relation);
     await Session.createSession(nanoid(), user.id, refreshToken, Math.floor(Date.now() / 1000) + TOKEN_DURATION);
     res.cookie('RefreshToken', refreshToken, { httpOnly: true, maxAge: REFRESH_TOKEN_DURATION * 1000 })
         .status(CODES.AUTH.AccessToken)
@@ -58,7 +58,7 @@ authRouter.post('/refreshToken', async (req: Request, res: Response) => {
             const payload = jwt.decode(parsedRefreshToken, { json: true });
             const sesion = await Session.findOne({ userId: payload?.sub, lastRefreshToken: parsedRefreshToken });
             if (sesion?.isSessionValid()) {
-                const { accessToken, refreshToken } = generateTokens(payload?.sub!, payload?.aud! as Roles);
+                const { accessToken, refreshToken } = generateTokens(payload?.sub!, payload?.aud! as Roles, payload?.relations);
                 await sesion.extendSession(refreshToken, Math.floor(Date.now() / 1000) + TOKEN_DURATION);
                 res.clearCookie('RefreshToken')
                     .cookie('RefreshToken', refreshToken, { httpOnly: true, maxAge: REFRESH_TOKEN_DURATION * 1000 })

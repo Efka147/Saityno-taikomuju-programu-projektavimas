@@ -1,0 +1,66 @@
+/* Container for the navigation bar */
+.navbar {
+  top: 0;
+  left: 0;
+  height: 53px;
+  width: 100vw;
+  position: relative;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background-color: #1c1c1e;
+  overflow: hidden;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+/* Button style */
+.navbar button {
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: transparent;
+  padding: 1px 10px;
+  border-radius: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 7px;
+}
+
+/* Icon inside the button */
+.navbar button img {
+  height: 30px;
+  width: 30px;
+  filter: brightness(0) saturate(100%) invert(100%);
+  transition: filter 0.3s ease;
+}
+
+/* Text inside the button */
+.navbar button p {
+  margin-left: 10px;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+/* Hover effect on buttons */
+.navbar button:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-3px);
+}
+
+/* Hover effect on icons */
+.navbar button:hover img {
+  filter: brightness(0) saturate(100%) invert(80%);
+}
+
+/* Hover effect on text */
+.navbar button:hover p {
+  color: #f1f1f1;
+}
+
+/* Optional: If you want to remove the scrollbar */
+.navbar::-webkit-scrollbar {
+  display: none;
+}

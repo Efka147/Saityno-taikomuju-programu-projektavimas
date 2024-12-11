@@ -1,0 +1,45 @@
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.blue-button {
+  padding: 10px 20px; /* Space inside the button */
+  font-size: 16px; /* Text size */
+  border: none; /* Remove the default border */
+  border-radius: 5px; /* Rounded corners */
+  background-color: #007bff; /* Background color */
+  color: white; /* Text color */
+  cursor: pointer; /* Pointer cursor on hover */
+}
+
+.blue-button:hover {
+  background-color: #0056b3; /* Darker shade on hover */
+}
+
+.red-button {
+  padding: 10px 20px; /* Space inside the button */
+  font-size: 16px; /* Text size */
+  border: none; /* Remove the default border */
+  border-radius: 5px; /* Rounded corners */
+  background-color: #dc3545; /* Red background color */
+  color: white; /* Text color */
+  cursor: pointer; /* Pointer cursor on hover */
+}
+
+.red-button:hover {
+  background-color: #a71d2a; /* Darker red shade on hover */
+}
+
+.green-button {
+  padding: 10px 20px; /* Space inside the button */
+  font-size: 16px; /* Text size */
+  border: none; /* Remove the default border */
+  border-radius: 5px; /* Rounded corners */
+  background-color: #28a745; /* Green background color */
+  color: white; /* Text color */
+  cursor: pointer; /* Pointer cursor on hover */
+}
+
+.green-button:hover {
+  background-color: #1e7e34; /* Darker green shade on hover */
+}

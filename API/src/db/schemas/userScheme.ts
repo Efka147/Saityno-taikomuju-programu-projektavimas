@@ -4,7 +4,7 @@ import { Roles } from '.';
 export interface IUser extends Document {
     username: string;
     password: string;
-    relation?: Types.ObjectId;
+    relation: { [key in Roles]: Types.ObjectId };
     role: Roles;
 }
 
@@ -28,7 +28,7 @@ interface UserModel extends Model<IUser> {
 const userSchema = new Schema<IUser>({
     username: String,
     password: String,
-    relation: Types.ObjectId,
+    relation: Object,
     role: String,
 });
 
@@ -36,7 +36,8 @@ userSchema.static('login', async function (username: string, password: string) {
     return await User.findOne({ username: username, password: password });
 });
 userSchema.static('getSubjectId', async function (sub: string) {
-    return (await User.findById(sub))?.relation?.toString()!;
+    const user = await User.findById(sub);
+    return user!.relation![user!.role].toString()!;
 });
 
 export const User = model<IUser, UserModel>('user', userSchema);
