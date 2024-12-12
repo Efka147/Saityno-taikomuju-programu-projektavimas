@@ -40,9 +40,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       subject?.trim() &&
       relation?.trim()
     ) {
-      console.log("here");
       if (Number(expiresAt) > Date.now()) {
-        console.log("there");
         setToken(token);
         setExpiresAt(Number(expiresAt));
         setSubject(subject);
@@ -69,25 +67,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return listener;
   }, [role, expiresAt, token, subject]);
 
-  React.useEffect(() => {
-    let timeout: NodeJS.Timeout | undefined;
-    if (expiresAt) {
-      timeout = setTimeout(refreshToken, expiresAt - Date.now() - 15000);
-    }
-    return () => clearTimeout(timeout);
-  }, [expiresAt]);
+  // React.useEffect(() => {
+  //   let timeout: NodeJS.Timeout | undefined;
+  //   if (expiresAt) {
+  //     timeout = setTimeout(refreshToken, expiresAt - Date.now() - 15000);
+  //   }
+  //   return () => clearTimeout(timeout);
+  // }, [expiresAt]);
 
-  const refreshToken = async () => {
-    const response = await fetch(`${APIBaseUrl}/refreshToken`);
-    if (!response || response.status !== 200) {
-      console.log("refresh failed");
-      return;
-    } else {
-      const json = await response.json();
-      const decoded = parsePayload(json.accessToken);
-      if (decoded) setExpiresAt(decoded.exp! * 1000);
-    }
-  };
+  // const refreshToken = async () => {
+  //   const response = await fetch(`${APIBaseUrl}/refreshToken`, {
+  //     method: "POST",
+  //     credentials: "include",
+  //   });
+  //   if (!response || response.status !== 200) {
+  //     console.log("refresh failed");
+  //     return;
+  //   } else {
+  //     const json = await response.json();
+  //     const decoded = parsePayload(json.accessToken);
+  //     if (decoded) setExpiresAt(decoded.exp! * 1000);
+  //   }
+  // };
 
   const parsePayload = (token: string) => {
     try {
@@ -113,8 +114,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const json = await response.json();
       setToken(json.accessToken);
       const decoded = parsePayload(json.accessToken);
-      //@ts-ignore
-      if (!decoded?.aud || !decoded.exp || !decoded.relations) return;
+      if (
+        !decoded?.aud ||
+        !decoded.exp ||
+        //@ts-ignore
+        (decoded.aud !== Roles.ADMIN && !decoded.relations)
+      )
+        return;
       //@ts-ignore
       setRelation(decoded.relations);
       setRole(decoded.aud as Roles);

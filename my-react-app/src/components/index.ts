@@ -1,4 +1,6 @@
-import TopNavigation from "./topNav/topNav";
+import NavigationBar from "./navigation";
 import Background from "./background";
-
-export { TopNavigation, Background };
+import DeleteModal from "./deleteModal";
+import EditSupplier from "./editSupplier";
+import EditWarehouse from "./editWarehouse";
+export { NavigationBar, Background, DeleteModal, EditSupplier, EditWarehouse };

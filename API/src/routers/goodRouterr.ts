@@ -128,7 +128,10 @@ goodRouter.post('/good', authorizationMiddleware, relationMiddleware, async (req
     const { name, description, ...rest } = req.body;
 
     if (
-        (Object.keys(rest).length !== 0, Object.keys(req.body).length !== 2 || !isValidParam(name, 'string') || !isValidParam(description, 'string'))
+        Object.keys(rest).length !== 0 ||
+        Object.keys(req.body).length !== 2 ||
+        !isValidParam(name, 'string') ||
+        !isValidParam(description, 'string')
     ) {
         res.status(CODES.POST.failure.UnprocessableRequest).json(makeErrorMessage(CODES.POST.failure.UnprocessableRequest, 'Malformed Body'));
         return;

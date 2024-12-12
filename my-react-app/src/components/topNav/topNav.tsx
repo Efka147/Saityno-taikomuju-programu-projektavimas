@@ -26,16 +26,6 @@ const TopNavigation: React.FC = () => {
         },
         icon: Controls,
       },
-      {
-        name: "Sandėliai",
-        onPress: () => {
-          if (location.pathname.substring(1) !== RouteNames.WAREHOUSES) {
-            navigate(`/${RouteNames.WAREHOUSES}`);
-          }
-        },
-        icon: Warehouse,
-      },
-      { name: "Prekės", onPress: () => {}, icon: Good },
     ],
     [Roles.SUPPLIER]: [
       {
@@ -58,8 +48,24 @@ const TopNavigation: React.FC = () => {
       },
     ],
     [Roles.WAREHOUSE]: [
-      { name: "Prekės", onPress: () => {}, icon: Good },
-      { name: "Mano sandelis", onPress: () => {}, icon: Warehouse },
+      {
+        name: "Mano sandelis",
+        onPress: () => {
+          if (location.pathname.substring(1) !== RouteNames.WAREHOUSES) {
+            navigate(`/${RouteNames.WAREHOUSES}`);
+          }
+        },
+        icon: Warehouse,
+      },
+      {
+        name: "Prekės",
+        onPress: () => {
+          if (location.pathname.substring(1) !== RouteNames.GOOD) {
+            navigate(`/${RouteNames.GOOD}`);
+          }
+        },
+        icon: Good,
+      },
     ],
   };
 

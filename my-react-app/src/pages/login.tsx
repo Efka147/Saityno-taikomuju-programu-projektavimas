@@ -68,6 +68,7 @@ const LoginScreen: React.FC = () => {
                 borderWidth: 0,
                 color: "white",
                 fontSize: 15,
+                cursor: "pointer",
               }}
               onClick={() => setShowError(false)}
             >
@@ -106,6 +107,7 @@ const LoginScreen: React.FC = () => {
             Slaptažodis
           </label>
           <input
+            type={"password"}
             style={{
               width: "100%",
               padding: "10px",

@@ -33,6 +33,7 @@ export enum RouteNames {
   LOGIN = "login",
   ADMIN = "admin",
   WAREHOUSES = "warehouses",
+  GOOD = "good",
 }
 
 export type Relations = { [key in Partial<Roles>]: string };

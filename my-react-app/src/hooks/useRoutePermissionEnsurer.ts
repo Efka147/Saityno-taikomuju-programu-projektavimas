@@ -5,9 +5,13 @@ import { Roles, RouteNames } from "../types";
 
 const useRoutePermissionEnsurer = (role: Roles | undefined | null) => {
   const routesByRole: { [key in Roles]: RouteNames[] } = {
-    [Roles.ADMIN]: [RouteNames.ADMIN, RouteNames.WAREHOUSES],
-    [Roles.SUPPLIER]: [RouteNames.ADMIN, RouteNames.WAREHOUSES],
-    [Roles.WAREHOUSE]: [RouteNames.WAREHOUSES],
+    [Roles.ADMIN]: [RouteNames.ADMIN, RouteNames.WAREHOUSES, RouteNames.GOOD],
+    [Roles.SUPPLIER]: [
+      RouteNames.ADMIN,
+      RouteNames.WAREHOUSES,
+      RouteNames.GOOD,
+    ],
+    [Roles.WAREHOUSE]: [RouteNames.WAREHOUSES, RouteNames.GOOD],
   };
 
   const location = useLocation();

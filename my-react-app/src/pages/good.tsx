@@ -1,33 +1,29 @@
 import * as React from "react";
-import {
-  Background,
-  DeleteModal,
-  EditWarehouse,
-  NavigationBar,
-} from "../components";
+import { Background, DeleteModal, NavigationBar } from "../components";
 import { AuthContext } from "../contexts/authContext";
-import { ErrorResponse, Roles, RouteNames, Warehouse } from "../types";
-import { useIsMobile, useRoutePermissionEnsurer } from "../hooks";
+import { ErrorResponse, Good } from "../types";
+import { useRoutePermissionEnsurer } from "../hooks";
 import { APIBaseUrl } from "../constants";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
+import EditGood from "../components/editGood";
 
-const Warehouses: React.FC = () => {
+const Goods: React.FC = () => {
   const authContext = React.useContext(AuthContext);
-  const [data, setData] = React.useState<Warehouse[]>();
-  const [deleting, setDeleting] = React.useState<Warehouse>();
-  const [editing, setEditing] = React.useState<Warehouse>();
-  const [adding, setAdding] = React.useState(false);
-  const navigate = useNavigate();
+  const [data, setData] = React.useState<Good[]>();
   useRoutePermissionEnsurer(authContext?.role);
-  const isMobile = useIsMobile();
   const location = useLocation();
-  const { supplierId } = location.state || {};
+  const [deleting, setDeleting] = React.useState<Good>();
+  const [editing, setEditing] = React.useState<Good>();
+  const [adding, setAdding] = React.useState(false);
+  const { supplierId, warehouseId } = location.state || {};
   const fetchData = async () => {
     if (!authContext?.role) return;
     const response = await fetch(
       `${APIBaseUrl}/supplier/${
         authContext?.relation?.supplier ?? supplierId ?? ""
-      }/warehouse/${authContext?.relation?.warehouse ?? ""}`,
+      }/warehouse/${
+        authContext?.relation?.warehouse ?? warehouseId ?? ""
+      }/good`,
       {
         headers: {
           Authorization: authContext?.accessToken ?? "",
@@ -35,20 +31,21 @@ const Warehouses: React.FC = () => {
       }
     );
     if (response.status === 200) {
-      const json = await response.json();
-      if (Array.isArray(json)) setData(json);
-      else setData([json]);
+      setData(await response.json());
     }
   };
+
   React.useEffect(() => {
     fetchData();
   }, [authContext?.role]);
 
-  const deleteWarehouse = async (item: Warehouse) => {
+  const deleteWarehouse = async (item: Good) => {
     await fetch(
       `${APIBaseUrl}/supplier/${
-        authContext?.relation?.supplier ?? supplierId
-      }/warehouse/${item._id}`,
+        authContext?.relation?.supplier ?? supplierId ?? ""
+      }/warehouse/${authContext?.relation?.warehouse ?? warehouseId}/good/${
+        item._id
+      }`,
       {
         method: "DELETE",
         headers: {
@@ -62,22 +59,15 @@ const Warehouses: React.FC = () => {
     fetchData();
   }, [authContext?.role]);
 
-  const onPressWatch = (item: Warehouse) => {
-    navigate(`/${RouteNames.GOOD}`, {
-      state: {
-        supplierId: authContext?.relation?.supplier ?? supplierId,
-        warehouseId: item._id,
-      },
-    });
-  };
-
   const onPressEdit = async (
-    item: Partial<Omit<Warehouse, "_id" | "supplier">>
+    item: Omit<Good, "_id" | "warehouse">
   ): Promise<string | undefined> => {
     const resp = await fetch(
       `${APIBaseUrl}/supplier/${
         authContext?.relation?.supplier ?? supplierId
-      }/warehouse/${editing?._id}`,
+      }/warehouse/${authContext?.relation?.warehouse ?? warehouseId}/good/${
+        editing?._id
+      }`,
       {
         //@ts-ignore
         body: JSON.stringify(item),
@@ -96,18 +86,18 @@ const Warehouses: React.FC = () => {
     setEditing(undefined);
     return;
   };
-  const onPressDelete = (item: Warehouse) => {
+  const onPressDelete = (item: Good) => {
     setDeleting(undefined);
     deleteWarehouse(item).then(fetchData);
   };
 
   const onPressAdd = async (
-    item: Partial<Omit<Warehouse, "_id" | "supplier">>
+    item: Omit<Good, "_id" | "warehouse">
   ): Promise<string | undefined> => {
     const resp = await fetch(
       `${APIBaseUrl}/supplier/${
         authContext?.relation?.supplier ?? supplierId
-      }/warehouse`,
+      }/warehouse/${authContext?.relation?.warehouse ?? warehouseId}/good`,
       {
         body: JSON.stringify(item),
         method: "POST",
@@ -136,19 +126,19 @@ const Warehouses: React.FC = () => {
         />
       )}
       {editing && (
-        <EditWarehouse
-          warehouse={editing}
+        <EditGood
+          good={editing}
           onCancel={() => setEditing(undefined)}
           onSubmit={(modified) => onPressEdit(modified)}
         />
       )}
       {adding && (
-        <EditWarehouse
-          warehouse={{
-            supplier: "",
-            location: "",
-            sizeSquareMeters: 0,
+        <EditGood
+          good={{
             _id: "",
+            name: "",
+            description: "",
+            warehouse: "",
           }}
           onCancel={() => setAdding(false)}
           onSubmit={(item) => onPressAdd(item)}
@@ -174,7 +164,7 @@ const Warehouses: React.FC = () => {
             justifyItems: "center",
           }}
         >
-          {data?.map((warehouse, index) => (
+          {data?.map((good, index) => (
             <div
               style={{
                 height: "200px",
@@ -197,73 +187,47 @@ const Warehouses: React.FC = () => {
                   flexDirection: "column",
                 }}
               >
-                <p style={{ fontSize: 18, fontWeight: "bold" }}>
-                  {warehouse.location}
-                </p>
-                <p>{warehouse.sizeSquareMeters} m2</p>
+                <p style={{ fontSize: 18, fontWeight: "bold" }}>{good.name}</p>
+                <p>{good.description}</p>
               </div>
-              {authContext?.role !== Roles.WAREHOUSE && (
-                <div
-                  style={{
-                    alignContent: "center",
-                    position: "relative",
-                    alignSelf: "center",
-                    justifyContent: "flex-end",
-                    ...(isMobile
-                      ? {
-                          flexDirection: "column",
-                          display: "flex",
-                        }
-                      : {
-                          flex: 1,
-                          flexDirection: "row",
-                          display: "flex",
-                        }),
-                  }}
+              <div
+                style={{
+                  flex: 1,
+                  alignContent: "center",
+                  position: "relative",
+                  alignSelf: "center",
+                  display: "flex",
+                  flexDirection: "row",
+                  justifyContent: "flex-end",
+                }}
+              >
+                <button
+                  className="blue-button"
+                  onClick={() => setEditing(good)}
                 >
-                  <button
-                    className="blue-button"
-                    onClick={() => onPressWatch(warehouse)}
-                  >
-                    Peržiūrėti
-                  </button>
-                  <button
-                    className="blue-button"
-                    style={isMobile ? {} : { marginLeft: "20px" }}
-                    onClick={() => setEditing(warehouse)}
-                  >
-                    Redaguoti
-                  </button>
-                  <button
-                    style={
-                      isMobile
-                        ? {}
-                        : { marginLeft: "20px", marginRight: "30px" }
-                    }
-                    className="red-button"
-                    onClick={() => setDeleting(warehouse)}
-                  >
-                    Ištrinti
-                  </button>
-                </div>
-              )}
+                  Redaguoti
+                </button>
+                <button
+                  style={{ marginLeft: "20px", marginRight: "30px" }}
+                  className="red-button"
+                  onClick={() => setDeleting(good)}
+                >
+                  Ištrinti
+                </button>
+              </div>
             </div>
           ))}
-          {authContext?.role !== Roles.WAREHOUSE && (
-            <button
-              style={{ marginBottom: "100px" }}
-              className="green-button"
-              onClick={() => {
-                setAdding(true);
-              }}
-            >
-              Pridėti sandelį
-            </button>
-          )}
+          <button
+            style={{ marginBottom: "100px" }}
+            className="green-button"
+            onClick={() => setAdding(true)}
+          >
+            Pridėti prekę
+          </button>
         </div>
       </div>
     </div>
   );
 };
 
-export default Warehouses;
+export default Goods;

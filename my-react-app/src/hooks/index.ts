@@ -1,2 +1,3 @@
 import useRoutePermissionEnsurer from "./useRoutePermissionEnsurer";
-export { useRoutePermissionEnsurer };
+import useIsMobile from "./useIsMobile";
+export { useRoutePermissionEnsurer, useIsMobile };
