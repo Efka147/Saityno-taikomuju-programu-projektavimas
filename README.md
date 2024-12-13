@@ -12,7 +12,7 @@ Sukurti sistemą kuri leistu efektyviai ir patogiai valdyti tiekėjam ir sandeli
 
 # Diegimo diagrama
 
-(https://github.com/Efka147/Saityno-taikomuju-programu-projektavimas/blob/main/images/deployment.png)
+![Diegimo diagrama](https://raw.githubusercontent.com/Efka147/Saityno-taikomuju-programu-projektavimas/refs/heads/main/images/deployment.png?token=GHSAT0AAAAAAC3OO2LR6X4THPGNN3V4Z7QWZ23SE5Q)
 
 ## Dokumentacija
 
