@@ -2,11 +2,11 @@
 
 ## Pavadinimas
 
-"Tiekėjų ir jų sandėlių bei prekių valdymas"
+"Tiekėjų, jų sandėlių bei prekių valdymas"
 
 ## Uždavinys
 
-Sukurti sistemą kuri leistu efektyviai ir patogiai valdyti tiekėjam ir sandeliam jiem pavaldžius objektus. Sistema leidžia tiekėjam pridėdi sandelių, juos modifikuoti, peržiūrėti prekes esančias juose, o sandeliai valdyti prekes. Administratorius turi pilna prieeigą peržiūrėti ir modifikuoti visus objektus sistemoje. Authorizacija ir autentifikacija yra realizuota naudojant JWT.
+Sukurti sistemą kuri leistu efektyviai ir patogiai valdyti tiekėjams ir jiem pavaldžiem objektum jų prekes. Sistema leidžia tiekėjam pridėdi sandelių, juos modifikuoti, peržiūrėti prekes esančias juose, o sandeliai valdyti prekes. Administratorius turi pilna prieigą peržiūrėti ir modifikuoti visus objektus sistemoje. Autorizacija ir autentifikacija yra realizuota naudojant JWT.
 
 ## Diagramos
 
