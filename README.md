@@ -10,6 +10,10 @@ Sukurti sistemą kuri leistu efektyviai ir patogiai valdyti tiekėjam ir sandeli
 
 ## Diagramos
 
+# Diegimo diagrama
+
+(https://github.com/Efka147/Saityno-taikomuju-programu-projektavimas/blob/main/images/deployment.png)
+
 ## Dokumentacija
 
 [API Dokumentacija](https://github.com/Efka147/Saityno-taikomuju-programu-projektavimas/blob/main/API/openapi.yaml)
