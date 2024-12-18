@@ -5,7 +5,7 @@ info:
     description: API for managing suppliers, warehouses, and goods
 
 servers:
-    - url: /api/v1 # Replace with your actual base path
+    - url: /api
 
 components:
     schemas:
